@@ -5,8 +5,9 @@ import time
 import torch
 
 from config import PROJECT_ROOT
-from src.dataset import ImageConceptDataset
+from src.concept_dataset import ImageConceptDataset
 from src.preprocessing import *
+from src.preprocessing.CUB import *
 
 from torch.utils.data import DataLoader
 
@@ -16,23 +17,23 @@ def preprocessing_main(class_concepts=False, verbose=False):
     input_dir = os.path.join(PROJECT_ROOT, 'images')
     resol = 299
     training = True
-    mapping_file = os.path.join(PROJECT_ROOT, 'data', 'images.txt')
+    mapping_file = os.path.join(PROJECT_ROOT, 'data', 'CUB', 'images.txt')
 
     image_tensors, _ = load_and_transform_images(input_dir, mapping_file, resol, training, batch_size=32, verbose=verbose)
 
     # CREATE CONCEPT LABELS MATRIX
-    concept_labels_file = os.path.join(PROJECT_ROOT, 'data', 'image_concept_labels.txt')
+    concept_labels_file = os.path.join(PROJECT_ROOT, 'data', 'CUB', 'image_concept_labels.txt')
 
     concept_labels, uncertainty_matrix = encode_image_concepts(concept_labels_file, verbose=verbose)
 
     # CREATE IMAGE LABELS MATRIX
-    labels_file = os.path.join(PROJECT_ROOT, 'data', 'image_class_labels.txt')
-    classes_file = os.path.join(PROJECT_ROOT, 'data', 'classes.txt')
+    labels_file = os.path.join(PROJECT_ROOT, 'data', 'CUB', 'image_class_labels.txt')
+    classes_file = os.path.join(PROJECT_ROOT, 'data', 'CUB', 'classes.txt')
 
     image_labels = one_hot_encode_labels(labels_file, classes_file, verbose=verbose)
 
     # CREATE TRAIN TEST SPLIT USING TXT FILE
-    split_file = os.path.join(PROJECT_ROOT, 'data', 'train_test_split.txt')
+    split_file = os.path.join(PROJECT_ROOT, 'data', 'CUB', 'train_test_split.txt')
     split_data = split_datasets(split_file, concept_labels, image_labels, uncertainty_matrix, image_tensors)
 
     train_concept_labels = split_data['train_concepts']
@@ -76,9 +77,3 @@ def preprocessing_main(class_concepts=False, verbose=False):
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True, drop_last=False)
 
     return concept_labels, train_loader, test_loader
-
-if __name__ == '__main__':
-    start_time = time.time()
-    preprocessing_main()
-    end_time = time.time()
-    print('exec time:', end_time-start_time)

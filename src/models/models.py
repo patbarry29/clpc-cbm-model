@@ -1,4 +1,4 @@
-from src import inception_v3
+from src.models import inception_v3
 
 
 def ModelXtoC(pretrained, freeze, n_classes, n_concepts, use_aux=False, expand_dim=0):

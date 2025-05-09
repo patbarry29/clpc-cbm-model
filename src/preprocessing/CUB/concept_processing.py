@@ -1,6 +1,6 @@
 import numpy as np
 
-from config import N_CLASSES
+from config import CUB_CONFIG
 
 def compute_class_level_concepts(concept_labels_matrix, uncertainty_matrix, image_labels_matrix):
     _, num_concepts = concept_labels_matrix.shape
@@ -57,7 +57,7 @@ def select_common_concepts(class_level_concepts, min_class_count):
 
 
 def apply_class_concepts_to_instances(train_img_labels, train_concept_labels, class_level_concepts, test_img_labels, test_concept_labels):
-    for y in range(N_CLASSES):
+    for y in range(CUB_CONFIG['N_CLASSES']):
         choice = train_img_labels[:, y] == 1
         train_concept_labels[choice,:] = class_level_concepts[y,:]
         choice = test_img_labels[:, y] == 1
