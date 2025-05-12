@@ -4,7 +4,7 @@ import time
 
 import torch
 
-from config import PROJECT_ROOT
+from config import CUB_CONFIG, PROJECT_ROOT
 from src.concept_dataset import ImageConceptDataset
 from src.preprocessing import *
 from src.preprocessing.CUB import *
@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader
 
 def preprocessing_main(class_concepts=False, verbose=False):
     # LOAD AND TRANSFORM IMAGES
-    input_dir = os.path.join(PROJECT_ROOT, 'images')
+    input_dir = os.path.join(PROJECT_ROOT, 'images', 'CUB')
     resol = 299
     training = True
     mapping_file = os.path.join(PROJECT_ROOT, 'data', 'CUB', 'images.txt')
@@ -52,7 +52,7 @@ def preprocessing_main(class_concepts=False, verbose=False):
 
     # apply class-level concepts to each instance
     if class_concepts:
-        train_concept_labels, test_concept_labels = apply_class_concepts_to_instances(train_img_labels, train_concept_labels, class_level_concepts, test_img_labels, test_concept_labels)
+        train_concept_labels, test_concept_labels = apply_class_concepts_to_instances(train_img_labels, train_concept_labels, class_level_concepts, test_img_labels, test_concept_labels, CUB_CONFIG)
 
     common_concept_indices = select_common_concepts(class_level_concepts, min_class_count=10)
     train_concept_labels = train_concept_labels[:, common_concept_indices]

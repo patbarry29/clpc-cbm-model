@@ -1,0 +1,94 @@
+import pandas as pd
+import os
+import numpy as np
+from torch.utils.data import DataLoader
+
+from config import DERM7PT_CONFIG, PROJECT_ROOT
+
+from src.concept_dataset import ImageConceptDataset
+from src.preprocessing import *
+from src.preprocessing.Derm7pt import *
+from src.utils import get_paths, load_Derm_dataset
+
+
+def preprocessing_main(class_concepts=False, verbose=False):
+    paths = get_paths()
+    dataset_handler = load_Derm_dataset(paths)
+
+    # Ensure text files exist
+    if not os.path.exists(paths['labels_file']):
+        export_image_props_to_text(dataset_handler.df)
+
+    # Get labels and concepts
+    image_labels = one_hot_encode_labels(paths['labels_file'], paths['classes_path'], verbose=verbose)
+    concepts_matrix = encode_image_concepts(dataset_handler, verbose=verbose)
+
+    # Load and transform images
+    image_tensors, image_paths = load_and_transform_images(paths['dir_images'], paths['mapping_file'], resol=299, use_training_transforms=True, batch_size=32, verbose=verbose)
+
+    # Filter if needed
+    if image_labels.shape[0] != len(image_tensors):
+        filtered_image_labels, filtered_concepts_matrix = filter_concepts_labels(
+            paths['mapping_file'], image_tensors, image_paths, image_labels, concepts_matrix
+        )
+    else:
+        filtered_image_labels, filtered_concepts_matrix = image_labels, concepts_matrix
+
+    if verbose:
+        print("Labels shape:", filtered_image_labels.shape)
+        print("Concepts shape:", filtered_concepts_matrix.shape)
+        print("Image tensors length:", len(image_tensors))
+
+    # Split data into train, validation and test sets if requested
+    tensors_dict, concepts_dict, labels_dict = split_data_by_indices(
+        image_tensors, image_paths, filtered_concepts_matrix, filtered_image_labels,
+        paths, verbose=verbose
+    )
+
+    train_concept_labels = concepts_dict['train']
+    val_concept_labels = concepts_dict['val']
+    test_concept_labels = concepts_dict['test']
+
+    train_img_labels = labels_dict['train']
+    val_img_labels = labels_dict['val']
+    test_img_labels = labels_dict['test']
+
+    train_tensors = tensors_dict['train']
+    val_tensors = tensors_dict['val']
+    test_tensors = tensors_dict['test']
+
+    # concept processing
+    class_level_concepts = compute_class_level_concepts(train_concept_labels, uncertainty_matrix=None, image_labels_matrix=train_img_labels)
+
+    # apply class-level concepts to each instance
+    if class_concepts:
+        train_concept_labels, test_concept_labels = apply_class_concepts_to_instances(train_img_labels, train_concept_labels, class_level_concepts, test_img_labels, test_concept_labels, DERM7PT_CONFIG)
+
+    common_concept_indices = select_common_concepts(class_level_concepts, min_class_count=2, CUB=False)
+    train_concept_labels = train_concept_labels[:, common_concept_indices]
+    test_concept_labels = test_concept_labels[:, common_concept_indices]
+
+    # CREATE TRAIN AND TEST DATASET
+    train_dataset = ImageConceptDataset(
+        image_tensors=train_tensors,
+        concept_labels=train_concept_labels,
+        image_labels=train_img_labels
+    )
+
+    test_dataset = ImageConceptDataset(
+        image_tensors=test_tensors,
+        concept_labels=test_concept_labels,
+        image_labels=test_img_labels
+    )
+
+    # CREATE DATALOADERS FROM DATASETS
+    batch_size = 64
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True, drop_last=False)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True, drop_last=False)
+
+    return filtered_concepts_matrix, train_loader, test_loader
+
+
+if __name__ == '__main__':
+    concepts_matrix, train_loader, test_loader = preprocessing_main(class_concepts=True, verbose=True)
+

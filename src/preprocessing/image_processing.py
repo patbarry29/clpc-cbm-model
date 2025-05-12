@@ -78,14 +78,14 @@ def load_and_transform_images(input_dir, mapping_file, resol, use_training_trans
 
     # Get all image paths
     all_image_paths = _get_all_filenames(input_dir)
-    if not all_image_paths:
-        vprint("No images found in the specified directory.", verbose)
-        return [], []
 
     # get correct sorting
     if mapping_file:
         filename_id_map = get_filename_to_id_mapping(mapping_file)
-        all_image_paths.sort(key=lambda path: filename_id_map.get(_get_filename_from_path(path), float('inf')))
+        # Create a case-insensitive lookup dictionary
+        filename_id_map_lower = {k.lower(): v for k, v in filename_id_map.items()}
+        # Sort using case-insensitive lookup
+        all_image_paths.sort(key=lambda path: filename_id_map_lower.get(_get_filename_from_path(path).lower(), float('inf')))
 
     vprint(f"Found {len(all_image_paths)} images.", verbose)
     num_batches = math.ceil(len(all_image_paths) / batch_size)

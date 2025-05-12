@@ -4,7 +4,7 @@ from config import PROJECT_ROOT
 from src.preprocessing.CUB import load_and_transform_images
 
 # Define full paths
-input_dir = os.path.join(PROJECT_ROOT, 'images')
+input_dir = os.path.join(PROJECT_ROOT, 'images', 'CUB')
 # output_dir = os.path.join(PROJECT_ROOT, 'output', 'transformed_tensor_batches')
 
 resol = 299
