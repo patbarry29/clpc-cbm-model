@@ -63,11 +63,18 @@ def select_common_concepts(class_level_concepts, min_class_count, CUB=True):
     return selected_concept_indices
 
 
-def apply_class_concepts_to_instances(train_img_labels, train_concept_labels, class_level_concepts, test_img_labels, test_concept_labels, config_dict):
+def apply_class_concepts_to_instances(class_level_concepts, config_dict, train_img_labels, train_concept_labels,
+                                    test_img_labels, test_concept_labels, val_img_labels=None, val_concept_labels=None):
     for y in range(config_dict['N_CLASSES']):
         choice = train_img_labels[:, y] == 1
         train_concept_labels[choice,:] = class_level_concepts[y,:]
+        if val_img_labels is not None:
+            choice = val_img_labels[:, y] == 1
+            val_concept_labels[choice,:] = class_level_concepts[y,:]
         choice = test_img_labels[:, y] == 1
         test_concept_labels[choice,:] = class_level_concepts[y,:]
+
+    if val_img_labels is not None:
+        return train_concept_labels, val_concept_labels, test_concept_labels
 
     return train_concept_labels, test_concept_labels

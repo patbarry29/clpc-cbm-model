@@ -13,7 +13,7 @@ project_root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root_path)
 
 from config import CUB_CONFIG
-from src.models import ModelXtoC
+from src.models import ModelXtoCInception
 from src.preprocessing.CUB import preprocessing_main
 from src.utils import find_class_imbalance
 from src.training import run_epoch_x_to_c
@@ -68,7 +68,7 @@ def main():
 
     # --- Model ---
     print("Initializing model...")
-    model = ModelXtoC(pretrained=True,
+    model = ModelXtoCInception(pretrained=True,
                     freeze=args.freeze_backbone,
                     n_classes=N_CLASSES,
                     use_aux=args.use_aux,

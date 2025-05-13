@@ -2,7 +2,11 @@ import torch
 
 def _calculate_loss(model, distances, y_true, lambda_binary, lambda_L1):
     # label loss
-    loss_cls = (distances*y_true).sum(axis=1)
+    # correct_term = (distances * y_true).sum(dim=1)
+    # incorrect_term = (distances * (1 - y_true)).sum(dim=1) / (1 - y_true).sum(dim=1)
+
+    # Combine terms: minimize correct distances, maximize incorrect distances
+    loss_cls = (distances * y_true).sum(dim=1) # - incorrect_term
     loss_cls = loss_cls.mean()
 
     # regularization loss

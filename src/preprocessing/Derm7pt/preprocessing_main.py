@@ -6,8 +6,10 @@ from torch.utils.data import DataLoader
 from config import DERM7PT_CONFIG, PROJECT_ROOT
 
 from src.concept_dataset import ImageConceptDataset
+from .split_data import split_data_by_indices
+from .dataset_utils import export_image_props_to_text, filter_concepts_labels
+from .concept_preprocessing import encode_image_concepts
 from src.preprocessing import *
-from src.preprocessing.Derm7pt import *
 from src.utils import get_paths, load_Derm_dataset
 
 
@@ -24,7 +26,7 @@ def preprocessing_main(class_concepts=False, verbose=False):
     concepts_matrix = encode_image_concepts(dataset_handler, verbose=verbose)
 
     # Load and transform images
-    image_tensors, image_paths = load_and_transform_images(paths['dir_images'], paths['mapping_file'], resol=299, use_training_transforms=True, batch_size=32, verbose=verbose)
+    image_tensors, image_paths = load_and_transform_images(paths['dir_images'], paths['mapping_file'], resol=224, use_training_transforms=True, batch_size=32, resnet=True, verbose=verbose)
 
     # Filter if needed
     if image_labels.shape[0] != len(image_tensors):
@@ -58,14 +60,19 @@ def preprocessing_main(class_concepts=False, verbose=False):
     test_tensors = tensors_dict['test']
 
     # concept processing
-    class_level_concepts = compute_class_level_concepts(train_concept_labels, uncertainty_matrix=None, image_labels_matrix=train_img_labels)
+    from config import DERM7PT_CONFIG
+
+    class_level_concepts = compute_class_level_concepts(train_concept_labels, None, train_img_labels)
 
     # apply class-level concepts to each instance
     if class_concepts:
-        train_concept_labels, test_concept_labels = apply_class_concepts_to_instances(train_img_labels, train_concept_labels, class_level_concepts, test_img_labels, test_concept_labels, DERM7PT_CONFIG)
+        train_concept_labels, val_concept_labels, test_concept_labels = apply_class_concepts_to_instances(
+            class_level_concepts, DERM7PT_CONFIG, train_img_labels, train_concept_labels,
+            test_img_labels, test_concept_labels, val_img_labels, val_concept_labels)
 
-    common_concept_indices = select_common_concepts(class_level_concepts, min_class_count=2, CUB=False)
+    common_concept_indices = select_common_concepts(class_level_concepts, min_class_count=0, CUB=False)
     train_concept_labels = train_concept_labels[:, common_concept_indices]
+    val_concept_labels = val_concept_labels[:, common_concept_indices]
     test_concept_labels = test_concept_labels[:, common_concept_indices]
 
     # CREATE TRAIN AND TEST DATASET
@@ -73,6 +80,12 @@ def preprocessing_main(class_concepts=False, verbose=False):
         image_tensors=train_tensors,
         concept_labels=train_concept_labels,
         image_labels=train_img_labels
+    )
+
+    val_dataset = ImageConceptDataset(
+        image_tensors=val_tensors,
+        concept_labels=val_concept_labels,
+        image_labels=val_img_labels
     )
 
     test_dataset = ImageConceptDataset(
@@ -84,9 +97,10 @@ def preprocessing_main(class_concepts=False, verbose=False):
     # CREATE DATALOADERS FROM DATASETS
     batch_size = 64
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True, drop_last=False)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True, drop_last=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True, drop_last=False)
 
-    return filtered_concepts_matrix, train_loader, test_loader
+    return filtered_concepts_matrix, train_loader, val_loader, test_loader
 
 
 if __name__ == '__main__':

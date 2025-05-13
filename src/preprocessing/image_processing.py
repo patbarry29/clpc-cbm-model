@@ -28,9 +28,15 @@ def resize_images(input_dir, output_dir, target_size):
                     img.save(os.path.join(output_dir, dir, filename))
 
 
-def _get_transform_pipeline(use_training_transforms, resol):
+def _get_transform_pipeline(use_training_transforms, resol, resnet=False):
     # resized_resol - resizes to slightly larger to ensure image is large enough before cropping to resol
     resized_resol = int(resol * 256/224) # 299 * 256/224 = 341.7
+    if resnet:
+        mean = [0.485, 0.456, 0.406]
+        std = [0.229, 0.224, 0.225]
+    else: # shifts from [0.0, 1.0] -> [-0.25, 0.25]
+        mean = [0.5,0.5,0.5]
+        std = [2,2,2]
     if use_training_transforms:
         # print("Using TRAINING transformations:")
         return transforms.Compose([
@@ -38,7 +44,7 @@ def _get_transform_pipeline(use_training_transforms, resol):
             transforms.RandomResizedCrop(resol),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
-            transforms.Normalize(mean = [0.5, 0.5, 0.5], std = [2, 2, 2])
+            transforms.Normalize(mean = mean, std = std)
             ])
     # Use LANCZOS resampling for better quality
     # print("Using VALIDATION/TEST transformations:")
@@ -46,7 +52,7 @@ def _get_transform_pipeline(use_training_transforms, resol):
         transforms.Resize(resized_resol, interpolation=transforms.InterpolationMode.LANCZOS),
         transforms.CenterCrop(resol),
         transforms.ToTensor(), # divide by 255, convert from [0,255] -> [0.0,1.0]
-        transforms.Normalize(mean = [0.5, 0.5, 0.5], std = [2, 2, 2]) # shifts from [0.0, 1.0] -> [-0.25, 0.25]
+        transforms.Normalize(mean = mean, std = std)
         ])
 
 
@@ -66,7 +72,7 @@ def _get_filename_from_path(path):
     return os.path.join(parent_folder, filename)
 
 
-def load_and_transform_images(input_dir, mapping_file, resol, use_training_transforms, batch_size = 64, verbose = False):
+def load_and_transform_images(input_dir, mapping_file, resol, use_training_transforms, batch_size = 64, resnet=False, verbose = False):
     """
     Returns:
         A tuple containing:
@@ -74,7 +80,7 @@ def load_and_transform_images(input_dir, mapping_file, resol, use_training_trans
         - A list of the corresponding original file paths for each tensor.
     """
     # Get the transformation pipeline
-    transform_pipeline = _get_transform_pipeline(use_training_transforms, resol)
+    transform_pipeline = _get_transform_pipeline(use_training_transforms, resol, resnet)
 
     # Get all image paths
     all_image_paths = _get_all_filenames(input_dir)
