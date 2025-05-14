@@ -5,6 +5,10 @@ unfinished/
 .DS_Store
 **/.DS_Store
 
+data/RIVAL10
+
+*_code*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

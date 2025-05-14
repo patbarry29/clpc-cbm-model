@@ -17,42 +17,37 @@ def _parse_file(concept_labels_file):
 
     return data
 
-
 def encode_image_concepts(concept_labels_file, verbose=False):
-    try:
-        # 1. get image_id, concept_id and is_present values from file
-        data = _parse_file(concept_labels_file)
+    # 1. get image_id, concept_id and is_present values from file
+    data = _parse_file(concept_labels_file)
 
-        # 2. Create a DataFrame from the parsed data
-        concept_df = pd.DataFrame(data, columns=['image_id', 'concept_id', 'is_present', 'uncertainty'])
+    # 2. Create a DataFrame from the parsed data
+    concept_df = pd.DataFrame(data, columns=['image_id', 'concept_id', 'is_present', 'uncertainty'])
 
-        # 3. get the number of unique images and concepts
-        unique_images = concept_df['image_id'].unique()
-        num_images = len(unique_images)
+    # 3. get the number of unique images and concepts
+    unique_images = concept_df['image_id'].unique()
+    num_images = len(unique_images)
 
-        # -- find the max concept_id to determine matrix dimensions
-        max_concept_id = concept_df['concept_id'].max()
+    # -- find the max concept_id to determine matrix dimensions
+    max_concept_id = concept_df['concept_id'].max()
 
-        vprint(f"Found {num_images} unique images.", verbose)
-        vprint(f"Found {max_concept_id} unique concepts.", verbose)
+    vprint(f"Found {num_images} unique images.", verbose)
+    vprint(f"Found {max_concept_id} unique concepts.", verbose)
 
-        # 4. create concepts matrix initialized with zeros
-        concept_matrix = np.zeros((num_images, max_concept_id), dtype=int)
-        uncertainty_matrix = np.zeros((num_images, max_concept_id), dtype=int)
+    # 4. create concepts matrix initialized with zeros
+    concept_matrix = np.zeros((num_images, max_concept_id), dtype=int)
+    uncertainty_matrix = np.zeros((num_images, max_concept_id), dtype=int)
 
-        # 5. populate matrix (vectorised)
-        img_ids = concept_df['image_id'].values - 1
-        concept_ids = concept_df['concept_id'].values - 1
-        concept_matrix[img_ids, concept_ids] = concept_df['is_present'].values
-        uncertainty_matrix[img_ids, concept_ids] = concept_df['uncertainty'].values
+    # 5. populate matrix (vectorised)
+    img_ids = concept_df['image_id'].values - 1
+    concept_ids = concept_df['concept_id'].values - 1
+    concept_matrix[img_ids, concept_ids] = concept_df['is_present'].values
+    uncertainty_matrix[img_ids, concept_ids] = concept_df['uncertainty'].values
 
-        vprint(f"Generated concept matrix with shape: {concept_matrix.shape}", verbose)
+    vprint(f"Generated concept matrix with shape: {concept_matrix.shape}", verbose)
 
-        return concept_matrix, uncertainty_matrix
+    return concept_matrix, uncertainty_matrix
 
-    except FileNotFoundError as e:
-        print(f"Error: File not found - {e}. Please check paths.")
-        return None
 
 def get_concepts(concept_vector, concepts_path):
     concept_names = load_concept_names(concepts_path)

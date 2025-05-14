@@ -60,8 +60,6 @@ def preprocessing_main(class_concepts=False, verbose=False):
     test_tensors = tensors_dict['test']
 
     # concept processing
-    from config import DERM7PT_CONFIG
-
     class_level_concepts = compute_class_level_concepts(train_concept_labels, None, train_img_labels)
 
     # apply class-level concepts to each instance
