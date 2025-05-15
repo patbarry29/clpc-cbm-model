@@ -6,13 +6,16 @@ import torch
 
 from config import CUB_CONFIG, PROJECT_ROOT
 from src.concept_dataset import ImageConceptDataset
-from src.preprocessing import *
-from src.preprocessing.CUB import *
+from src.preprocessing.CUB.data_encoding import encode_image_concepts
+from src.preprocessing.CUB.split_train_test import split_datasets
+from src.preprocessing.concept_processing import *
+from src.preprocessing.image_processing import load_and_transform_images
+from src.preprocessing.label_encoding import one_hot_encode_labels
 
 from torch.utils.data import DataLoader
 
 
-def preprocessing_main(class_concepts=False, verbose=False):
+def preprocessing_CUB(class_concepts=False, verbose=False):
     # LOAD AND TRANSFORM IMAGES
     input_dir = os.path.join(PROJECT_ROOT, 'images', 'CUB')
     resol = 299

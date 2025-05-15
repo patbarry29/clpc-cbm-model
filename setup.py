@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="only_essential_code",
+    name="hybrid_cbm_prototype_model",
     version="0.1",
     packages=find_packages(),
 )

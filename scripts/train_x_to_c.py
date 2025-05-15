@@ -14,7 +14,7 @@ sys.path.insert(0, project_root_path)
 
 from config import CUB_CONFIG
 from src.models import ModelXtoCInception
-from src.preprocessing.CUB import preprocessing_main
+from src.preprocessing.CUB import preprocessing_CUB
 from src.utils import find_class_imbalance
 from src.training import run_epoch_x_to_c
 
@@ -43,7 +43,7 @@ def parse_arguments():
     args = parser.parse_args()
     return args
 
-def main():
+def CUB():
     args = parse_arguments()
 
     # --- Setup ---
@@ -63,7 +63,7 @@ def main():
 
     # --- Data ---
     print("Loading and preprocessing data...")
-    concept_labels, train_loader, test_loader = preprocessing_main(class_concepts=False, verbose=args.verbose)
+    concept_labels, train_loader, test_loader = preprocessing_CUB(class_concepts=False, verbose=args.verbose)
     print("Data loaded.")
 
     # --- Model ---
@@ -140,5 +140,5 @@ def main():
 
     print(f"\nTraining Finished. Best test accuracy: {best_test_acc:.3f} at epoch {best_epoch}")
 
-if __name__ == '__main__':
-    main()
+if __name__ == '__CUB__':
+    CUB()

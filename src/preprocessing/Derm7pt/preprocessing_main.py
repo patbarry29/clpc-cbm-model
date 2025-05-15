@@ -13,7 +13,7 @@ from src.preprocessing import *
 from src.utils import get_paths, load_Derm_dataset
 
 
-def preprocessing_main(class_concepts=False, verbose=False):
+def preprocessing_Derm7pt(class_concepts=False, verbose=False):
     paths = get_paths()
     dataset_handler = load_Derm_dataset(paths)
 
@@ -23,7 +23,7 @@ def preprocessing_main(class_concepts=False, verbose=False):
 
     # Get labels and concepts
     image_labels = one_hot_encode_labels(paths['labels_file'], paths['classes_path'], verbose=verbose)
-    concepts_matrix = encode_image_concepts(dataset_handler, verbose=verbose)
+    concepts_matrix = encode_image_concepts(dataset_handler, paths['mapping_file'], verbose=verbose)
 
     # Load and transform images
     image_tensors, image_paths = load_and_transform_images(paths['dir_images'], paths['mapping_file'], resol=224, use_training_transforms=True, batch_size=32, resnet=True, verbose=verbose)
@@ -102,5 +102,5 @@ def preprocessing_main(class_concepts=False, verbose=False):
 
 
 if __name__ == '__main__':
-    concepts_matrix, train_loader, test_loader = preprocessing_main(class_concepts=True, verbose=True)
+    concepts_matrix, train_loader, test_loader = preprocessing_Derm7pt(class_concepts=True, verbose=True)
 
