@@ -4,7 +4,7 @@ import torch.nn as nn
 import numpy as np
 import torch.multiprocessing as mp
 
-from config import PROJECT_ROOT, RIVAL10_CONFIG
+from src.config import PROJECT_ROOT, RIVAL10_CONFIG
 from src.utils import *
 from src.training import run_epoch_x_to_c
 from src.preprocessing.RIVAL10 import preprocessing_rival10

@@ -2,7 +2,7 @@ import os
 import time
 import numpy as np
 
-from config import PROJECT_ROOT
+from src.config import PROJECT_ROOT
 from src.preprocessing.CUB import encode_image_concepts
 from src.preprocessing.CUB import one_hot_encode_labels
 

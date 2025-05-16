@@ -1,6 +1,6 @@
 import os
 import time
-from config import PROJECT_ROOT
+from src.config import PROJECT_ROOT
 from src.preprocessing import load_and_transform_images
 
 # Define full paths

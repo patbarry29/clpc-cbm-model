@@ -1,6 +1,6 @@
 import numpy as np
 
-from config import CUB_CONFIG
+from src.config import CUB_CONFIG
 
 def compute_class_level_concepts(concept_labels_matrix, uncertainty_matrix, image_labels_matrix):
     _, num_concepts = concept_labels_matrix.shape

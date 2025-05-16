@@ -5,7 +5,7 @@ import time
 import torch
 from torch.utils.data import DataLoader
 
-from config import RIVAL10_CONFIG, PROJECT_ROOT
+from src.config import RIVAL10_CONFIG, PROJECT_ROOT
 from src.concept_dataset import ImageConceptDataset
 from src.preprocessing import compute_class_level_concepts, apply_class_concepts_to_instances, select_common_concepts
 from src.preprocessing.RIVAL10 import *

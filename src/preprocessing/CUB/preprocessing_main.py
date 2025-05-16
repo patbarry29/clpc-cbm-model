@@ -4,7 +4,7 @@ import time
 
 import torch
 
-from config import CUB_CONFIG, PROJECT_ROOT
+from src.config import CUB_CONFIG, PROJECT_ROOT
 from src.concept_dataset import ImageConceptDataset
 from src.preprocessing.CUB.data_encoding import encode_image_concepts
 from src.preprocessing.CUB.split_train_test import split_datasets

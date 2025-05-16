@@ -3,7 +3,7 @@ import os
 import numpy as np
 from torch.utils.data import DataLoader
 
-from config import DERM7PT_CONFIG, PROJECT_ROOT
+from src.config import DERM7PT_CONFIG, PROJECT_ROOT
 
 from src.concept_dataset import ImageConceptDataset
 from .split_data import split_data_by_indices

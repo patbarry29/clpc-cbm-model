@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from src.preprocessing.image_processing import _get_all_filenames, _get_filename_from_path
 from src.utils import get_filename_to_id_mapping
-from config import PROJECT_ROOT
+from src.config import PROJECT_ROOT
 
 def find_missing_images(input_dir, mapping_file):
     """

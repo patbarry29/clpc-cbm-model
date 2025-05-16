@@ -1,5 +1,5 @@
 import os
-from config import PROJECT_ROOT
+from src.config import PROJECT_ROOT
 from src.preprocessing.CUB import resize_images
 
 # Define full paths

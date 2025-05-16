@@ -3,7 +3,7 @@ from sklearn.model_selection import train_test_split
 import torch
 from torch.utils.data import Subset
 
-from config import CUB_CONFIG
+from src.config import CUB_CONFIG
 from src.utils.helpers import vprint
 
 

@@ -3,7 +3,7 @@ import os
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 
-from config import PROJECT_ROOT, RIVAL10_CONFIG
+from src.config import PROJECT_ROOT, RIVAL10_CONFIG
 
 def get_filename_mapping(dir_path):
     mapping = {}

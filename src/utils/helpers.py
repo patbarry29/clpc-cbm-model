@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import torch
 
-from config import PROJECT_ROOT
+from src.config import PROJECT_ROOT
 from derm7pt.dataset import Derm7PtDataset
 
 

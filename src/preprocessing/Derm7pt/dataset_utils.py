@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from config import PROJECT_ROOT
+from src.config import PROJECT_ROOT
 
 def export_image_props_to_text(dataset):
     all_images = []

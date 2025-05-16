@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
-from config import PROJECT_ROOT
+from src.config import PROJECT_ROOT
 from src.utils import vprint
 
 def encode_image_concepts(dataset, image_names_path, verbose=False):

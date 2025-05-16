@@ -12,7 +12,7 @@ import numpy as np
 project_root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root_path)
 
-from config import CUB_CONFIG
+from src.config import CUB_CONFIG
 from src.models import ModelXtoCInception
 from src.preprocessing.CUB import preprocessing_CUB
 from src.utils import find_class_imbalance
