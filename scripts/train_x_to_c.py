@@ -63,7 +63,7 @@ def CUB():
 
     # --- Data ---
     print("Loading and preprocessing data...")
-    concept_labels, train_loader, test_loader = preprocessing_CUB(class_concepts=False, verbose=args.verbose)
+    concept_labels, train_loader, test_loader = preprocessing_CUB(training=True, class_concepts=False, verbose=args.verbose)
     print("Data loaded.")
 
     # --- Model ---

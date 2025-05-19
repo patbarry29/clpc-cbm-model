@@ -18,7 +18,7 @@ def main():
         torch.cuda.empty_cache()
 
     torch.manual_seed(42)
-    concept_labels, train_loader, test_loader = preprocessing_rival10(class_concepts=True, verbose=True)
+    concept_labels, train_loader, test_loader = preprocessing_rival10(training=False, class_concepts=True, verbose=True)
 
     device = torch.device("cuda" if torch.cuda.is_available()
                         else "mps" if torch.backends.mps.is_available()
@@ -40,16 +40,8 @@ def main():
 
     model_path = os.path.join(PROJECT_ROOT, 'notebook', 'RIVAL10', 'x_to_c_best_model.pth')
 
-    try:
-        model = torch.load(model_path, map_location=device, weights_only=False)
-        print(f"Successfully loaded model from {model_path}")
-    except (FileNotFoundError, IOError) as e:
-        print(f"Error loading model: {e}")
-        return
-
-    if train_loader is None:
-        print("Training data loader is empty or None. Exiting.")
-        return
+    model = torch.load(model_path, map_location=device, weights_only=False)
+    print(f"Successfully loaded model from {model_path}")
 
     with torch.no_grad():
         shuffled_concept_labels = []

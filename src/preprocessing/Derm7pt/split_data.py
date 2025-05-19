@@ -17,7 +17,7 @@ def split_data_by_indices(image_tensors, image_paths, concepts_matrix, image_lab
                             names=['img_id', 'img_path', 'img_type', 'case_num'])
 
     # Create a mapping from image path to index in our arrays
-    path_to_index = {os.path.basename(path): i for i, path in enumerate(image_paths)}
+    path_to_index = {path.upper(): i for i, path in enumerate(image_paths)}
 
     # Function to get indices for a split
     def get_split_indices(case_indices):
@@ -27,7 +27,7 @@ def split_data_by_indices(image_tensors, image_paths, concepts_matrix, image_lab
             case_rows = mapping_df[mapping_df['case_num'] == case_num]
 
             for _, row in case_rows.iterrows():
-                img_path = os.path.basename(row['img_path'])
+                img_path = row['img_path'].upper()
                 if img_path in path_to_index:
                     idx = path_to_index[img_path]
                     indices.append(idx)

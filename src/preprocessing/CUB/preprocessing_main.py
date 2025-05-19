@@ -15,14 +15,13 @@ from src.preprocessing.label_encoding import one_hot_encode_labels
 from torch.utils.data import DataLoader
 
 
-def preprocessing_CUB(class_concepts=False, verbose=False):
+def preprocessing_CUB(training=False, class_concepts=False, verbose=False):
     # LOAD AND TRANSFORM IMAGES
     input_dir = os.path.join(PROJECT_ROOT, 'images', 'CUB')
     resol = 299
-    training = True
     mapping_file = os.path.join(PROJECT_ROOT, 'data', 'CUB', 'images.txt')
 
-    image_tensors, _ = load_and_transform_images(input_dir, mapping_file, resol, training, batch_size=32, verbose=verbose)
+    image_tensors, _ = load_and_transform_images(input_dir, mapping_file, resol, training, batch_size=64, verbose=verbose)
 
     # CREATE CONCEPT LABELS MATRIX
     concept_labels_file = os.path.join(PROJECT_ROOT, 'data', 'CUB', 'image_concept_labels.txt')
