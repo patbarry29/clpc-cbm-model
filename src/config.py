@@ -36,9 +36,9 @@ CUB_CONFIG = {
 }
 
 DERM7PT_CONFIG = {
-    "N_CONCEPTS": 28,
-    "N_TRIMMED_CONCEPTS": 28,
-    "N_CLASSES": 34,
+    "N_CONCEPTS": 19,
+    "N_TRIMMED_CONCEPTS": 19,
+    "N_CLASSES": 5,
     'N_IMAGES': 2013
 }
 

@@ -4,23 +4,25 @@ import pandas as pd
 from src.utils.helpers import vprint
 
 
-def one_hot_encode_labels(image_class_path, classes_path, verbose=False):
-    # 1. determine the number of classes
-    classes_df = pd.read_csv(classes_path, sep=' ', header=None, names=['class_id', 'class_name'])
-    num_classes = len(classes_df)
-    vprint(f"Found {num_classes} classes.", verbose)
+def one_hot_encode_labels(dataset, image_names_path, verbose=False):
+    all_labels = dataset.get_labels(data_type='all', one_hot=True)
+    mapping_data = pd.read_csv(image_names_path, sep=' ', header=None, names=['img_id', 'img_path', 'img_type', 'case_id'])
 
-    # 2. get image labels
-    labels_df = pd.read_csv(image_class_path, sep=' ', header=None, names=['image_id', 'class_id'])
-    num_images = len(labels_df)
-    vprint(f"Found labels for {num_images} images.", verbose)
+    labels_matrix = []
 
-    # 3. initialise label matrix with zeros
-    one_hot_matrix = np.zeros((num_images, num_classes), dtype=int)
+    for _, row in mapping_data.iterrows():
+        case_id = row['case_id']
+        label_one_hot = all_labels['DIAG'][case_id]
 
-    # 4. populate matrix
-    class_ids = labels_df['class_id'].values - 1
-    one_hot_matrix[np.arange(len(labels_df)), class_ids] = 1
+        labels_matrix.append(label_one_hot)
 
-    vprint(f"Generated one-hot matrix with shape: {one_hot_matrix.shape}", verbose)
-    return one_hot_matrix
+    labels_matrix = np.asarray(labels_matrix)
+    vprint(f"Total number of label columns: {labels_matrix.shape[1]}", verbose)
+    vprint(f"Found {labels_matrix.shape[0]} instances.", verbose)
+    vprint(f"Created matrix of shape: {labels_matrix.shape}", verbose)
+
+    # Remove columns 0 and 4
+    # labels_matrix = np.delete(labels_matrix, [0, 3, 4], axis=1)
+    # vprint(f"Matrix shape after removing columns 0 and 4: {labels_matrix.shape}", verbose)
+
+    return labels_matrix

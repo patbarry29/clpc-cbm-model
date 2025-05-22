@@ -13,5 +13,5 @@ def ModelXtoCInception(pretrained, freeze, n_classes, n_concepts, use_aux=False,
             expand_dim=expand_dim
         )
 
-def ModelXtoCResNet(pretrained, freeze, n_concepts, expand_dim=0):
-    return CustomResNet(pretrained=pretrained, freeze=freeze, n_concepts=n_concepts)
+def ModelXtoCResNet(pretrained, freeze, n_concepts, expand_dim=0, n_classes=None, label_mode=False):
+    return CustomResNet(pretrained=pretrained, freeze=freeze, n_concepts=n_concepts, n_classes=n_classes, label_mode=label_mode)

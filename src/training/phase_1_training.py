@@ -99,3 +99,60 @@ def run_epoch_x_to_c(model, loader, criterion_list,  optimizer, n_concepts,
         return loss_meter.avg, acc_meter.avg, outputs
     return loss_meter.avg, acc_meter.avg
 
+def run_epoch_x_to_y(
+    model, loader, criterion, optimizer,
+    is_training=False, device='cpu', verbose=False,
+    return_outputs=None
+):
+    """
+    Training/validation loop for X -> Y (label) prediction.
+    Assumes one-hot encoded labels are in data[2].
+    """
+    if is_training:
+        model.train()
+    else:
+        model.eval()
+
+    loss_meter, acc_meter = AverageMeter(), AverageMeter()
+    start_time = time.time()
+    outputs = []
+
+    desc = "Training" if is_training else "Validation"
+    tqdm_loader = tqdm(loader, desc=desc, leave=False, disable=not verbose)
+
+    for _, data in enumerate(tqdm_loader):
+        inputs = data[0].to(device)
+        labels_onehot = data[2].to(device)  # One-hot encoded labels
+
+        if is_training:
+            optimizer.zero_grad()
+
+        logits = model(inputs)
+        if isinstance(logits, (list, tuple)):
+            logits = logits[0]  # or select the correct output for classification
+
+        # Convert one-hot to class indices for CrossEntropyLoss
+        targets = torch.argmax(labels_onehot, dim=1)
+
+        loss = criterion(logits, targets)
+
+        if is_training:
+            loss.backward()
+            optimizer.step()
+
+        # Accuracy calculation
+        preds = torch.argmax(logits, dim=1)
+        acc = (preds == targets).float().mean().item()
+
+        loss_meter.update(loss.item(), inputs.size(0))
+        acc_meter.update(acc, inputs.size(0))
+
+        if return_outputs:
+            outputs.append(logits.detach().cpu())
+
+        tqdm_loader.set_postfix(loss=f'{loss_meter.avg:.4f}', acc=f'{acc_meter.avg:.4f}')
+
+    if return_outputs:
+        return loss_meter.avg, acc_meter.avg, outputs
+    return loss_meter.avg, acc_meter.avg
+

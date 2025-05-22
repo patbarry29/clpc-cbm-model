@@ -8,22 +8,23 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 
+
 # Adjust sys.path to find project modules
 project_root_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, project_root_path)
 
-from src.config import CUB_CONFIG
-from src.models import ModelXtoCInception
-from src.preprocessing.CUB import preprocessing_CUB
+from src.models import ModelXtoCResNet
+from src.config import DERM7PT_CONFIG
+from src.preprocessing.Derm7pt import preprocessing_Derm7pt
 from src.utils import find_class_imbalance
 from src.training import run_epoch_x_to_c
 
-N_CLASSES, N_TRIMMED_CONCEPTS = CUB_CONFIG['N_CLASSES'], CUB_CONFIG['N_TRIMMED_CONCEPTS']
+N_CLASSES, N_TRIMMED_CONCEPTS = DERM7PT_CONFIG['N_CLASSES'], DERM7PT_CONFIG['N_TRIMMED_CONCEPTS']
 
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Train X -> C Concept Model')
     # Data/Paths
-    parser.add_argument('--log_dir', default='models', help='Directory to save logs and best model')
+    parser.add_argument('--log_dir', default='models/Derm7pt', help='Directory to save logs and best model')
     # Model Hyperparameters
     parser.add_argument('--freeze_backbone', action='store_true', help='Freeze convolutional layers of InceptionV3')
     parser.add_argument('--use_aux', action='store_true', default=True, help='Use auxiliary logits') # Defaulting to True as in notebook
@@ -43,7 +44,7 @@ def parse_arguments():
     args = parser.parse_args()
     return args
 
-def CUB():
+def Derm7pt():
     args = parse_arguments()
 
     # --- Setup ---
@@ -63,16 +64,15 @@ def CUB():
 
     # --- Data ---
     print("Loading and preprocessing data...")
-    concept_labels, train_loader, test_loader = preprocessing_CUB(training=True, class_concepts=False, verbose=args.verbose)
+    concept_labels, train_loader, val_loader, test_loader = preprocessing_Derm7pt(training=True, class_concepts=True, verbose=args.verbose)
     print("Data loaded.")
 
     # --- Model ---
     print("Initializing model...")
-    model = ModelXtoCInception(pretrained=True,
-                    freeze=args.freeze_backbone,
-                    n_classes=N_CLASSES,
-                    use_aux=args.use_aux,
-                    n_concepts=N_TRIMMED_CONCEPTS)
+    model = ModelXtoCResNet(pretrained=True,
+                freeze=True,
+                n_concepts=N_TRIMMED_CONCEPTS)
+
     model = model.to(device)
     print("Model initialized (X -> C).")
 
@@ -115,30 +115,39 @@ def CUB():
 
         print(f"Epoch {epoch+1} Train Summary | Loss: {train_loss:.4f} | Acc: {train_acc:.3f}")
 
-        test_loss, test_acc = 0.0, 0.0
-        if test_loader:
-            test_loss, test_acc = run_epoch_x_to_c(
-                model, test_loader, attr_criterion, optimizer, n_concepts=N_TRIMMED_CONCEPTS,
+        test_loss, best_val_acc = 0.0, 0.0
+        if val_loader:
+            val_loss, val_acc = run_epoch_x_to_c(
+                model, val_loader, attr_criterion, optimizer, n_concepts=N_TRIMMED_CONCEPTS,
                 device=device, verbose=args.verbose
             )
 
-            print(f"Epoch {epoch+1} Test Summary   | Loss: {test_loss:.4f} | Acc: {test_acc:.3f}")
+            print(f"Epoch {epoch+1} Val Summary   | Loss: {val_loss:.4f} | Acc: {val_acc:.3f}")
 
             # Save best model based on test accuracy
-            if test_acc > best_test_acc:
-                print(f"  Test accuracy improved ({best_test_acc:.3f} -> {test_acc:.3f}). Saving model...")
-                best_test_acc = test_acc
+            if val_acc > best_val_acc:
+                print(f"  Validation accuracy improved ({best_val_acc:.3f} -> {val_acc:.3f}). Saving model...")
+                best_val_acc = val_acc
                 best_epoch = epoch + 1
-                torch.save(model, os.path.join(args.log_dir, 'instance_level_model.pth'))
-                print(f"  Model saved to {os.path.join(args.log_dir, 'instance_level_model.pth')}")
+                torch.save(model, os.path.join(args.log_dir, 'best_model.pth'))
+                print(f"  Model saved to {os.path.join(args.log_dir, 'best_model.pth')}")
 
         # Scheduler step
         scheduler.step()
         epoch_end_time = time.time()
         print(f"Epoch {epoch+1} Time: {epoch_end_time - epoch_start_time:.2f}s | Current LR: {optimizer.param_groups[0]['lr']:.6f}")
-        # logger.write(...) # Add logging to file here if using Logger
 
-    print(f"\nTraining Finished. Best test accuracy: {best_test_acc:.3f} at epoch {best_epoch}")
+    print(f"\nTraining Finished. Best val accuracy: {best_val_acc:.3f} at epoch {best_epoch}")
 
-if __name__ == '__CUB__':
-    CUB()
+    if test_loader:
+        with torch.no_grad():
+
+            test_loss, test_acc = run_epoch_x_to_c(
+                model, test_loader, attr_criterion, optimizer=None, n_concepts=N_TRIMMED_CONCEPTS,
+                device=device, verbose=args.verbose
+            )
+
+    print(f'Best Model Summary   | Loss: {test_loss:.4f} | Acc: {test_acc:.3f}')
+
+if __name__ == '__main__':
+    Derm7pt()

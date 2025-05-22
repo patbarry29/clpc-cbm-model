@@ -4,7 +4,7 @@ import pandas as pd
 import torch
 
 from src.config import PROJECT_ROOT
-from derm7pt.dataset import Derm7PtDataset
+from derm7pt.dataset import Derm7PtDatasetGroupInfrequent
 
 
 def vprint(message, is_verbose):
@@ -80,7 +80,7 @@ def load_Derm_dataset(paths):
     valid_indexes = list(pd.read_csv(paths['val_idx'])['indexes'])
     test_indexes = list(pd.read_csv(paths['test_idx'])['indexes'])
 
-    return Derm7PtDataset(
+    return Derm7PtDatasetGroupInfrequent(
         dir_images=paths['dir_images'],
         metadata_df=metadata_df,
         train_indexes=train_indexes,

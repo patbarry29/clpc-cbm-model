@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn as nn
 
@@ -44,14 +45,53 @@ class PrototypeClassifier(nn.Module):
             # dists = dists[torch.arange(x.shape[0]), predictions,:]
         return dists
 
-    def threshold(self, val_x, val_y):
-        pass
+    def threshold(self, val_x, val_y, percentile=0.98):
+        self.eval()
+        with torch.no_grad():
+            dists = self(val_x)
+            min_dists = dists.min(dim=1).values.cpu().numpy()
+
+            # y_val is one-hot or not ?
+            if val_y.ndim > 1 and val_y.shape[1] > 1:
+                real_labels = val_y.argmax(dim=1).cpu()
+            else:
+                real_labels = val_y
+
+            pred_labels = self.predict(val_x).cpu()
+            matching_array = (pred_labels == real_labels).numpy()
+
+            correct_min_dists = min_dists[matching_array]
+            correct_min_dists.sort()
+
+            self.computed_threshold_ = np.percentile(correct_min_dists, percentile * 100)
+            print(f"Threshold computed: {self.computed_threshold_:.4f} using {len(correct_min_dists)} correctly classified validation samples at {percentile*100:.1f}th percentile.")
+        return self.computed_threshold_
+
+    def outlier_predict(self, x):
+        self.eval()
+        with torch.no_grad():
+            dists_x = self(x)
+            min_dists_x = dists_x.min(dim=1).values
+            predictions = self.predict(x)
+
+            # Identify inliers
+            is_inlier = min_dists_x.cpu() <= self.computed_threshold_
+
+            # Return predictions, but mark outliers with a -1
+            conformal_predictions = predictions.clone()
+            conformal_predictions[~is_inlier.to(predictions.device)] = -1
+
+        return conformal_predictions, is_inlier
 
     def conformal_predict(self, x):
         pass
 
-    def explanation(self, x):
+    def explanation(self, c_hat, y_hat):
+        # take in c_hat, find relevant prototype from y_hat
+        # do np.abs(c_hat-prototype)
+        # to-do: how to do a global explanation from local explanations
         pass
+
 
 
 

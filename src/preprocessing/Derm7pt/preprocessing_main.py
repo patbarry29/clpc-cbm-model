@@ -22,7 +22,7 @@ def preprocessing_Derm7pt(training=False, class_concepts=True, verbose=False):
         export_image_props_to_text(dataset_handler.df)
 
     # Get labels and concepts
-    image_labels = one_hot_encode_labels(paths['labels_file'], paths['classes_path'], verbose=verbose)
+    image_labels = one_hot_encode_labels(dataset_handler, paths['mapping_file'], verbose=verbose)
     concepts_matrix = encode_image_concepts(dataset_handler, paths['mapping_file'], verbose=verbose)
 
     # Load and transform images
@@ -103,4 +103,3 @@ def preprocessing_Derm7pt(training=False, class_concepts=True, verbose=False):
 
 if __name__ == '__main__':
     concepts_matrix, train_loader, test_loader = preprocessing_Derm7pt(class_concepts=True, verbose=True)
-

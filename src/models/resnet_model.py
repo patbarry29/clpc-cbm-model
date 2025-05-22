@@ -10,7 +10,7 @@ class FC(nn.Module):
         return self.fc(x)
 
 class CustomResNet(nn.Module):
-    def __init__(self, pretrained, freeze, n_concepts, expand_dim=0):
+    def __init__(self, pretrained, freeze, n_concepts, n_classes=None, expand_dim=0, label_mode=False):
         super().__init__()
         # Load the base ResNet
         base_resnet = models.resnet50(pretrained=pretrained)
@@ -32,10 +32,14 @@ class CustomResNet(nn.Module):
 
         num_ftrs = base_resnet.fc.in_features
 
-        # Your custom concept heads
-        self.all_fc = nn.ModuleList()
-        for _ in range(n_concepts):
-            self.all_fc.append(FC(num_ftrs, 1, expand_dim))
+        self.label_mode = label_mode
+        if label_mode:
+            assert n_classes is not None, "n_classes must be specified for label_mode"
+            self.fc_label = nn.Linear(num_ftrs, n_classes)
+        else:
+            self.all_fc = nn.ModuleList()
+            for _ in range(n_concepts):
+                self.all_fc.append(FC(num_ftrs, 1, expand_dim))
 
     def forward(self, x):
         x = self.conv1(x)
@@ -50,7 +54,10 @@ class CustomResNet(nn.Module):
 
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
-        outputs_list = [fc(x) for fc in self.all_fc]
-        return outputs_list
+        if self.label_mode:
+            return self.fc_label(x)  # [batch_size, n_classes]
+        else:
+            outputs_list = [fc(x) for fc in self.all_fc]
+            return outputs_list
 
 # model = CustomResNet(pretrained=True, freeze=True, n_concepts=N_TRIMMED_CONCEPTS)

@@ -10,9 +10,9 @@ def export_image_props_to_text(dataset):
     case_ids = []
 
     for idx, row in dataset.iterrows():
-        all_images.append(row['clinic'])
-        all_types.append('clinic')
-        case_ids.append(idx)
+        # all_images.append(row['clinic'])
+        # all_types.append('clinic')
+        # case_ids.append(idx)
 
         all_images.append(row['derm'])
         all_types.append('derm')

@@ -41,8 +41,8 @@ def preprocessing_rival10(training=False, class_concepts=False, verbose=False):
     vprint(f"Generated one-hot training matrix with shape: {train_img_labels.shape}", verbose)
 
     # get image tensors
-    train_tensors, _ = load_and_transform_images(TRAIN_IMG_PATH, 224, training, train_mapping.values(), resnet=True, verbose=True)
-    test_tensors, _ = load_and_transform_images(TEST_IMG_PATH, 224, training, test_mapping.values(), resnet=True, verbose=True)
+    train_tensors, _ = load_and_transform_images(TRAIN_IMG_PATH, 224, training, train_mapping.values(), resnet=True, verbose=verbose)
+    test_tensors, _ = load_and_transform_images(TEST_IMG_PATH, 224, training, test_mapping.values(), resnet=True, verbose=verbose)
 
     # concept processing
     class_level_concepts = compute_class_level_concepts(train_concept_matrix, None, train_img_labels)
