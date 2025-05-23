@@ -35,6 +35,12 @@ class PrototypeClassifier(nn.Module):
     def get_sigmoid_prototypes(self):
         return torch.sigmoid(self.protoypes)
 
+    def get_binary_prototypes(self):
+        Prototypes = torch.sigmoid(self.protoypes)
+        Prototypes[Prototypes>=0.5] = 1
+        Prototypes[Prototypes<0.5]= 0
+        return Prototypes
+
     def concept_wise_dist(self, x):
         with torch.no_grad():
             Prototypes = torch.sigmoid(self.protoypes)

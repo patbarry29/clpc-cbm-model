@@ -21,8 +21,4 @@ def one_hot_encode_labels(dataset, image_names_path, verbose=False):
     vprint(f"Found {labels_matrix.shape[0]} instances.", verbose)
     vprint(f"Created matrix of shape: {labels_matrix.shape}", verbose)
 
-    # Remove columns 0 and 4
-    # labels_matrix = np.delete(labels_matrix, [0, 3, 4], axis=1)
-    # vprint(f"Matrix shape after removing columns 0 and 4: {labels_matrix.shape}", verbose)
-
     return labels_matrix

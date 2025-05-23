@@ -9,6 +9,7 @@ from src.concept_dataset import ImageConceptDataset
 from .split_data import split_data_by_indices
 from .dataset_utils import export_image_props_to_text, filter_concepts_labels
 from .concept_preprocessing import encode_image_concepts
+from .label_encoding import one_hot_encode_labels
 from src.preprocessing import *
 from src.utils import get_paths, load_Derm_dataset
 

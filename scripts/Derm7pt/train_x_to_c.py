@@ -100,7 +100,7 @@ def Derm7pt():
 
     # --- Training Loop ---
     print("\nStarting Training Loop...")
-    best_test_acc = 0.0
+    best_val_acc = 0.0
     best_epoch = -1
 
     for epoch in range(args.epochs):
@@ -115,7 +115,6 @@ def Derm7pt():
 
         print(f"Epoch {epoch+1} Train Summary | Loss: {train_loss:.4f} | Acc: {train_acc:.3f}")
 
-        test_loss, best_val_acc = 0.0, 0.0
         if val_loader:
             val_loss, val_acc = run_epoch_x_to_c(
                 model, val_loader, attr_criterion, optimizer, n_concepts=N_TRIMMED_CONCEPTS,
