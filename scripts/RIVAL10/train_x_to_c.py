@@ -64,7 +64,7 @@ def RIVAL10():
 
     # --- Data ---
     print("Loading and preprocessing data...")
-    concept_labels, train_loader, test_loader = preprocessing_rival10(training=True, class_concepts=True, verbose=args.verbose)
+    concept_labels, train_loader, val_loader, test_loader = preprocessing_rival10(training=True, class_concepts=True, verbose=args.verbose)
     print("Data loaded.")
 
     # --- Model ---
@@ -100,7 +100,7 @@ def RIVAL10():
 
     # --- Training Loop ---
     print("\nStarting Training Loop...")
-    best_test_acc = 0.0
+    best_val_acc = 0.0
     best_epoch = -1
 
     for epoch in range(args.epochs):
@@ -115,29 +115,29 @@ def RIVAL10():
 
         print(f"Epoch {epoch+1} Train Summary | Loss: {train_loss:.4f} | Acc: {train_acc:.3f}")
 
-        test_loss, test_acc = 0.0, 0.0
-        if test_loader:
-            test_loss, test_acc = run_epoch_x_to_c(
-                model, test_loader, attr_criterion, optimizer, n_concepts=N_TRIMMED_CONCEPTS,
+        val_loss, val_acc = 0.0, 0.0
+        if val_loader:
+            val_loss, val_acc = run_epoch_x_to_c(
+                model, val_loader, attr_criterion, optimizer, n_concepts=N_TRIMMED_CONCEPTS,
                 device=device, verbose=args.verbose
             )
 
-            print(f"Epoch {epoch+1} Test Summary   | Loss: {test_loss:.4f} | Acc: {test_acc:.3f}")
+            print(f"Epoch {epoch+1} Validation Summary   | Loss: {val_loss:.4f} | Acc: {val_acc:.3f}")
 
             # Save best model based on test accuracy
-            if test_acc > best_test_acc:
-                print(f"  Test accuracy improved ({best_test_acc:.3f} -> {test_acc:.3f}). Saving model...")
-                best_test_acc = test_acc
+            if val_acc > best_val_acc:
+                print(f"  Validation accuracy improved ({best_val_acc:.3f} -> {val_acc:.3f}). Saving model...")
+                best_val_acc = val_acc
                 best_epoch = epoch + 1
-                torch.save(model, os.path.join(args.log_dir, 'instance_level_model.pth'))
-                print(f"  Model saved to {os.path.join(args.log_dir, 'instance_level_model.pth')}")
+                torch.save(model, os.path.join(args.log_dir, 'model.pth'))
+                print(f"  Model saved to {os.path.join(args.log_dir, 'model.pth')}")
 
         # Scheduler step
         scheduler.step()
         epoch_end_time = time.time()
         print(f"Epoch {epoch+1} Time: {epoch_end_time - epoch_start_time:.2f}s | Current LR: {optimizer.param_groups[0]['lr']:.6f}")
 
-    print(f"\nTraining Finished. Best test accuracy: {best_test_acc:.3f} at epoch {best_epoch}")
+    print(f"\nTraining Finished. Best validation accuracy: {best_val_acc:.3f} at epoch {best_epoch}")
 
 
 if __name__ == '__main__':

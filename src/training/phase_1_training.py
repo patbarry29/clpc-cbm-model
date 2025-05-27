@@ -1,8 +1,7 @@
-import time
-
 import torch
 from tqdm import tqdm
-from src.utils import *
+
+from src.utils import AverageMeter, binary_accuracy
 
 def _get_outputs(model, inputs):
     outputs = model(inputs)
@@ -40,7 +39,6 @@ def run_epoch_x_to_c(model, loader, criterion_list,  optimizer, n_concepts,
 
     # track average loss and accuracy throughout the epoch
     loss_meter, acc_meter = AverageMeter(), AverageMeter()
-    start_time = time.time()
 
     outputs = []
 
@@ -114,7 +112,6 @@ def run_epoch_x_to_y(
         model.eval()
 
     loss_meter, acc_meter = AverageMeter(), AverageMeter()
-    start_time = time.time()
     outputs = []
 
     desc = "Training" if is_training else "Validation"

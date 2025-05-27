@@ -1,14 +1,10 @@
-import numpy as np
 import os
-import time
-
-import torch
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, random_split
 
 from src.config import RIVAL10_CONFIG, PROJECT_ROOT
 from src.concept_dataset import ImageConceptDataset
 from src.preprocessing import compute_class_level_concepts, apply_class_concepts_to_instances, select_common_concepts
-from src.preprocessing.RIVAL10 import *
+from src.preprocessing.RIVAL10.data_encoding import get_concept_matrix, get_filename_mapping, one_hot_encode_labels
 from src.preprocessing.RIVAL10.image_processing import load_and_transform_images
 from src.utils.helpers import vprint
 
@@ -68,9 +64,17 @@ def preprocessing_rival10(training=False, class_concepts=False, verbose=False):
         image_labels=test_img_labels
     )
 
+    # Split train dataset into train and validation (80%/20%)
+    train_size = int(0.8 * len(train_dataset))
+    val_size = len(train_dataset) - train_size
+    train_subset, val_subset = random_split(train_dataset, [train_size, val_size])
+
+    vprint(f"Split train dataset: {train_size} training samples, {val_size} validation samples", verbose)
+
     # CREATE DATALOADERS FROM DATASETS
     batch_size = 64
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True, drop_last=False)
+    train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True, drop_last=False)
+    val_loader = DataLoader(val_subset, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True, drop_last=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True, drop_last=False)
 
-    return train_concept_matrix, train_loader, test_loader
+    return train_concept_matrix, train_loader, val_loader, test_loader

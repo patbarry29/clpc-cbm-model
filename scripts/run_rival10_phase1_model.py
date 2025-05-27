@@ -18,7 +18,7 @@ def main():
         torch.cuda.empty_cache()
 
     torch.manual_seed(42)
-    concept_labels, train_loader, test_loader = preprocessing_rival10(training=False, class_concepts=True, verbose=True)
+    concept_labels, train_loader, val_loader, test_loader = preprocessing_rival10(training=False, class_concepts=True, verbose=True)
 
     device = torch.device("cuda" if torch.cuda.is_available()
                         else "mps" if torch.backends.mps.is_available()
