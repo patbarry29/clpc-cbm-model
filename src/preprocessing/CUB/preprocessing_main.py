@@ -1,8 +1,5 @@
 import numpy as np
 import os
-import time
-
-import torch
 
 from src.config import CUB_CONFIG, PROJECT_ROOT
 from src.concept_dataset import ImageConceptDataset
@@ -59,6 +56,10 @@ def preprocessing_CUB(training=False, class_concepts=False, verbose=False):
     train_concept_labels = train_concept_labels[:, common_concept_indices]
     test_concept_labels = test_concept_labels[:, common_concept_indices]
 
+    output_dir = os.path.join(PROJECT_ROOT, 'output', 'CUB')
+    os.makedirs(output_dir, exist_ok=True)
+    np.save(os.path.join(output_dir, 'class_level_concepts.npy'), class_level_concepts[:, common_concept_indices])
+
     # CREATE TRAIN AND TEST DATASET
     train_dataset = ImageConceptDataset(
         image_tensors=train_tensors,
@@ -74,7 +75,7 @@ def preprocessing_CUB(training=False, class_concepts=False, verbose=False):
 
     # CREATE DATALOADERS FROM DATASETS
     batch_size = 64
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True, drop_last=False)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=training, num_workers=4, pin_memory=True, drop_last=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True, drop_last=False)
 
     return concept_labels, train_loader, test_loader

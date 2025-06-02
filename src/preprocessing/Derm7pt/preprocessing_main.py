@@ -94,7 +94,7 @@ def preprocessing_Derm7pt(training=False, class_concepts=True, verbose=False):
 
     # CREATE DATALOADERS FROM DATASETS
     batch_size = 64
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=4, pin_memory=True, drop_last=False)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=training, num_workers=4, pin_memory=True, drop_last=False)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True, drop_last=False)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=4, pin_memory=True, drop_last=False)
 
