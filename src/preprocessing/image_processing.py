@@ -1,12 +1,11 @@
 from PIL import Image
 import os
-
 import torchvision.transforms as transforms
 import math
 
-from src.utils import *
-
 from tqdm import tqdm
+
+from src.utils.helpers import get_filename_to_id_mapping, vprint
 
 
 def resize_images(input_dir, output_dir, target_size):
@@ -114,7 +113,7 @@ def load_and_transform_images(input_dir, mapping_file, resol, use_training_trans
             all_processed_paths.append(img_path)
             processed_count += 1
 
-    vprint(f"\nFinished processing.", verbose)
+    vprint("\nFinished processing.", verbose)
     vprint(f"Successfully transformed: {processed_count} images.", verbose)
 
     # Return the list of all tensors and their paths

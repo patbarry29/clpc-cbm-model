@@ -5,26 +5,26 @@ import torch.nn as nn
 class PrototypeClassifier(nn.Module):
     def __init__(self, num_features, num_classes):
         super().__init__()
-        self.protoypes = nn.Parameter(torch.rand(num_classes, num_features))  # initialize the prototype matrix P
+        self.prototypes = nn.Parameter(torch.rand(num_classes, num_features))  # initialize the prototype matrix P
 
     def forward(self, x):
         # x: (batch_size, num_features)
         # L1distance：|x_i - M_m|_1
         # (batch_size, num_classes, num_features)
-        dist = torch.abs(x.unsqueeze(1) - torch.sigmoid(self.protoypes))
+        dist = torch.abs(x.unsqueeze(1) - torch.sigmoid(self.prototypes))
         dist = dist.sum(dim=2)
         return dist  # (batch_size, num_classes)
 
     def binary_regularization(self):
-        sigmoid_protos = torch.sigmoid(self.protoypes)
+        sigmoid_protos = torch.sigmoid(self.prototypes)
         return (sigmoid_protos * (1 - sigmoid_protos)).mean()
 
     def sparsity_regularization(self):
-        return torch.sum(torch.sigmoid(self.protoypes))
+        return torch.sum(torch.sigmoid(self.prototypes))
 
     def predict(self, x):
         with torch.no_grad():
-            Prototypes = torch.sigmoid(self.protoypes)
+            Prototypes = torch.sigmoid(self.prototypes)
             Prototypes[Prototypes>=0.5] = 1
             Prototypes[Prototypes<0.5]= 0
             dists = torch.abs(x.unsqueeze(1) - Prototypes)
@@ -33,17 +33,17 @@ class PrototypeClassifier(nn.Module):
         return predictions
 
     def get_sigmoid_prototypes(self):
-        return torch.sigmoid(self.protoypes)
+        return torch.sigmoid(self.prototypes)
 
     def get_binary_prototypes(self):
-        Prototypes = torch.sigmoid(self.protoypes)
+        Prototypes = torch.sigmoid(self.prototypes)
         Prototypes[Prototypes>=0.5] = 1
         Prototypes[Prototypes<0.5]= 0
         return Prototypes
 
     def concept_wise_dist(self, x):
         with torch.no_grad():
-            Prototypes = torch.sigmoid(self.protoypes)
+            Prototypes = torch.sigmoid(self.prototypes)
             Prototypes[Prototypes>=0.5] = 1
             Prototypes[Prototypes<0.5]= 0
             dists = x.unsqueeze(1) - Prototypes
@@ -97,6 +97,9 @@ class PrototypeClassifier(nn.Module):
         # do np.abs(c_hat-prototype)
         # to-do: how to do a global explanation from local explanations
         pass
+
+    def modify_prototypes(self, new_prototypes):
+        self.prototypes.data = new_prototypes
 
 
 
