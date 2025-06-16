@@ -74,6 +74,7 @@ Now there are 3 folders left in `PROJECT_ROOT/data/RIVAL10`: `meta`, `train`, `t
  
 ## Running Experiments
 Now that the datasets are all in the correct places, the structure should look like this:
+
 <img width="259" alt="image" src="https://github.com/user-attachments/assets/840f0ab4-f829-4b75-956b-fce06bc19d1d" />
 
 With this in place, we can run stage 1. Simply go to `notebook/{dataset}/training.ipynb`, and run the notebook.
