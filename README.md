@@ -15,8 +15,8 @@ We tested our model on 3 different datasets: CUB, Derm7pt, RIVAL10.
 
 # Setup Instructions
 **Download stage 1 outputs ($\boldsymbol{\hat c}$):**
-- *placeholder_link*
-- Store the unzipped folder in `PROJECT_ROOT/output`.
+- [Google Drive](https://drive.google.com/drive/folders/158wBzLsIdrGg5WggX5W4Vw2qb3bLdQG_?usp=sharing)
+- Store the 3 folders in `PROJECT_ROOT/output`.
 
 **(OPTIONAL) Download images.**
 - [CUB](https://worksheets.codalab.org/worksheets/0x362911581fcd4e048ddfd84f47203fd2).
@@ -40,3 +40,43 @@ Run [notebook/experiments/intervention_accuracy.ipynb](notebook/experiments/inte
 
 ## Robustness to Noise
 Run [notebook/experiments/test_robustness.ipynb](notebook/experiments/test_robustness.ipynb). Again, use same indices to select dataset.
+
+
+# (OPTIONAL) Stage 1 Reproduction
+To reproduce this, first the datasets must be downloaded from the 3 links above. 
+
+## Dataset Preparation
+
+### CUB and Derm7pt datasets
+
+Once the datasets are downloaded, place the images for each dataset into `PROJECT_ROOT/images/{dataset_name}`.
+
+The `data` folder is also required, the files required for both CUB and Derm7pt datasets are already provided in the repo.
+
+### RIVAL10
+
+RIVAL10 is a special case, as the images are mixed with the concept descriptions for each image.
+- So we must run a command to separate these into different folders.
+  - ```bash
+    mkdir -p RIVAL10/images/train/images RIVAL10/images/test/images
+  
+    find RIVAL10/train -type f -iname '*.JPEG' ! -iname '*_merged_mask.JPEG' -exec mv {} RIVAL10/images/train/images/ \;
+    find RIVAL10/test -type f -iname '*.JPEG' ! -iname '*_merged_mask.JPEG' -exec mv {} RIVAL10/images/test/images/ \;
+    ```
+- Now that we have an `images` folder in RIVAL10, we can just move this folder to `PROJECT_ROOT/RIVAL10/images`.
+
+Now there are 3 folders left in `PROJECT_ROOT/data/RIVAL10`: `meta`, `train`, `test`
+- `meta`: 3 files required
+  - `label_mappings`, `train_test_split_by_url`, `wnid_to_class.json`
+- `train` and `test`, with subfolder `ordinary`:
+  - consists of `.npy` and `.pkl` files
+  - One of each for every image. They describe the concept values present in each image.
+ 
+## Running Experiments
+Now that the datasets are all in the correct places, the structure should look like this:
+<img width="259" alt="image" src="https://github.com/user-attachments/assets/840f0ab4-f829-4b75-956b-fce06bc19d1d" />
+
+With this in place, we can run stage 1. Simply go to `notebook/{dataset}/training.ipynb`, and run the notebook.
+- Note that this is an intensive process, particularly for CUB and RIVAL10.
+- The learned model will be saved locally.
+- Run `notebook/{dataset}/test.ipynb` to get the test accuracy and store the outputs of the CNN locally. 
