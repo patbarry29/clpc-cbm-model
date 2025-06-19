@@ -1,7 +1,8 @@
 import os
+from matplotlib import pyplot as plt
+from matplotlib.patches import Patch
 import numpy as np
 import pandas as pd
-import torch
 
 from src.config import PROJECT_ROOT
 from derm7pt.dataset import Derm7PtDatasetGroupInfrequent
@@ -87,3 +88,60 @@ def load_Derm_dataset(paths):
         valid_indexes=valid_indexes,
         test_indexes=test_indexes
     )
+
+def plot_explanation(data, binary_data, labels, total_dist):
+    plt.rcParams['font.sans-serif'] = ['Arial', 'DejaVu Sans']
+    plt.rcParams['axes.unicode_minus'] = False
+
+    # Colors
+    binary_colors = ['#FF7F7F' if v > 0 else '#FFD17F' for v in data]
+    bar_colors = ['#FF7F7F' if v > 0 else '#7FBF7F' for v in data]
+
+    # Plot
+    plt.figure(figsize=(12, 6))
+    x = np.arange(len(data))
+
+    # Plot bottom (binary)
+    plt.bar(x, binary_data, edgecolor='black', color=binary_colors, linewidth=1, width=0.8)
+
+    # Plot top (actual data)
+    plt.bar(x, data + binary_data, edgecolor='black', color=bar_colors, linewidth=1, width=0.8)
+
+    for i, (b_val, f_val) in enumerate(zip(binary_data, data)):
+        # Label for binary part
+        if b_val > 0:
+            plt.text(i, (b_val + f_val) / 2, f'{np.abs(b_val+f_val):.2f}', ha='center', va='center', fontweight='bold', fontsize=14)
+        # Label for main data part
+        if np.abs(f_val) > 0.05:
+            plt.text(i, b_val + f_val / 2, f'{np.abs(f_val):.2f}', ha='center', va='center', fontweight='bold', fontsize=14)
+
+
+    plt.axvline(np.sum(data<0)-.5, color='black', linestyle='--', linewidth=2, alpha=0.5)
+    plt.xlabel('Concept', fontsize=14, fontweight='bold')
+    plt.ylabel('Score/Distance', fontsize=14, fontweight='bold')
+    plt.xticks(np.arange(len(data)), labels)
+
+    y_ticks = plt.yticks()[0]  # Get current tick positions
+    new_y_ticks = y_ticks[:-1]
+    plt.yticks(new_y_ticks, [f'{yt:.1f}' for yt in new_y_ticks], fontsize=14)
+
+    plt.grid(axis='y', linestyle='-', alpha=0.3)
+
+    plt.text(np.sum(data<0)/2-0.5, 1.1, 'Should Be Present',
+        ha='center', va='center', fontsize=14, fontweight='bold',
+        bbox=dict(boxstyle="round,pad=0.3", facecolor='lightblue', alpha=0.5))
+
+    plt.text(np.sum(data<0) + np.sum(data>=0) / 2 - 0.5, 1.1, 'Should Not Be Present',
+        ha='center', va='center', fontsize=14, fontweight='bold',
+        bbox=dict(boxstyle="round,pad=0.3", facecolor='lightcoral', alpha=0.5))
+
+    legend_elements = [
+        Patch(facecolor='white', edgecolor='white', label=f'Total Distance = {total_dist:.2f}'),
+        Patch(facecolor='#7FBF7F', edgecolor='black', label='Correct Activation'),
+        Patch(facecolor='#FFD17F', edgecolor='black', label='Missing Activation'),
+        Patch(facecolor='#FF7F7F', edgecolor='black', label='Erroneous Activation')
+    ]
+
+    plt.legend(handles=legend_elements, loc='center right', prop={'family': 'sans-serif', 'weight': 'bold', 'size': 14})
+    plt.tight_layout()
+    plt.show()

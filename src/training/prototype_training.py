@@ -1,6 +1,6 @@
 import torch
 
-def _calculate_loss(model, distances, y_true, lambda_binary, lambda_L1):
+def _calculate_loss(model, distances, y_true, lambda_binary, lambda_L1, lambda_push):
     # label loss
     correct_term = (distances * y_true).sum(dim=1)
 
@@ -10,7 +10,7 @@ def _calculate_loss(model, distances, y_true, lambda_binary, lambda_L1):
     incorrect_term = (distances * (1 - y_true)).sum(dim=1) / denominator
 
     # Combine terms: minimize correct distances, maximize incorrect distances (by subtracting incorrect_term)
-    loss_cls = (correct_term - incorrect_term).mean() # Added subtraction of incorrect_term
+    loss_cls = (correct_term - (lambda_push*incorrect_term)).mean() # Added subtraction of incorrect_term
 
     # regularization loss
     loss_binary = model.binary_regularization()
@@ -19,7 +19,7 @@ def _calculate_loss(model, distances, y_true, lambda_binary, lambda_L1):
     # total loss
     return loss_cls + (lambda_binary * loss_binary) + (lambda_L1 * loss_sparsity)
 
-def train_epoch(model, train_dataloader, optimizer, lambda_binary, lambda_L1, device='cpu'):
+def train_epoch(model, train_dataloader, optimizer, lambda_binary, lambda_L1, lambda_push=1, device='cpu'):
     model.train()
     total_loss = 0.0
     correct = 0
@@ -31,7 +31,7 @@ def train_epoch(model, train_dataloader, optimizer, lambda_binary, lambda_L1, de
         distances = model(x_batch)
 
         # total loss
-        loss = _calculate_loss(model, distances, y_batch, lambda_binary, lambda_L1)
+        loss = _calculate_loss(model, distances, y_batch, lambda_binary, lambda_L1, lambda_push)
 
         # back propagation
         optimizer.zero_grad()

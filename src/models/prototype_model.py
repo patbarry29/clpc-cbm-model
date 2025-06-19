@@ -2,6 +2,8 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from src.utils.helpers import plot_explanation
+
 class PrototypeClassifier(nn.Module):
     def __init__(self, num_features, num_classes):
         super().__init__()
@@ -92,11 +94,47 @@ class PrototypeClassifier(nn.Module):
     def conformal_predict(self, x):
         pass
 
-    def explanation(self, c_hat, y_hat):
-        # take in c_hat, find relevant prototype from y_hat
-        # do np.abs(c_hat-prototype)
-        # to-do: how to do a global explanation from local explanations
-        pass
+
+    def get_uncertainties(self, x, y_true):
+        pred = self.predict(x.unsqueeze(0))
+        print("Classification Correct:", (y_true==pred).item())
+        return x - self.get_binary_prototypes()[pred]
+
+    def explanation(self, x, y_true):
+        concept_uncertainties = self.get_uncertainties(x, y_true)
+
+        uncertainties = concept_uncertainties.cpu().detach().numpy()[0]
+        top_indices = np.argsort(np.abs(uncertainties))[::-1][:10]
+        top_uncertainties = uncertainties[top_indices]  # Work on top 10 values
+
+        # Masks
+        mask_neg = top_uncertainties <= 0
+        mask_pos = top_uncertainties > 0
+
+        # Sort within top 10
+        neg_indices = np.argsort(-top_uncertainties[mask_neg])  # ascending
+        pos_indices = np.argsort(-top_uncertainties[mask_pos])  # descending
+
+        # Map sorted positions back to indices in top_indices, then to original
+        neg_sorted_indices = top_indices[mask_neg][neg_indices]
+        pos_sorted_indices = top_indices[mask_pos][pos_indices]
+
+        # Combine indices and values
+        final_sorted_indices = np.concatenate([neg_sorted_indices, pos_sorted_indices])
+        final_sorted_data = uncertainties[final_sorted_indices]
+
+        # Binary overlay
+        binary_data = final_sorted_data.copy()
+        binary_data[final_sorted_data <= 0] = 1
+        binary_data[final_sorted_data > 0] = 0
+
+        # Labels
+        sorted_labels = [fr'$c_{{{idx+1}}}$' for idx in final_sorted_indices]
+
+        # Distance
+        total_distance = np.sum(np.abs(uncertainties))
+
+        plot_explanation(final_sorted_data, np.sort(binary_data)[::-1], sorted_labels, total_distance)
 
     def modify_prototypes(self, new_prototypes):
         self.prototypes.data = new_prototypes
