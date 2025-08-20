@@ -119,7 +119,7 @@ def plot_explanation(data, binary_data, labels, total_dist):
     plt.axvline(np.sum(data<0)-.5, color='black', linestyle='--', linewidth=2, alpha=0.5)
     plt.xlabel('Concept', fontsize=14, fontweight='bold')
     plt.ylabel('Score/Distance', fontsize=14, fontweight='bold')
-    plt.xticks(np.arange(len(data)), labels)
+    plt.xticks(np.arange(len(data)), labels, fontsize=14)
 
     y_ticks = plt.yticks()[0]  # Get current tick positions
     new_y_ticks = y_ticks[:-1]
@@ -131,7 +131,7 @@ def plot_explanation(data, binary_data, labels, total_dist):
         ha='center', va='center', fontsize=14, fontweight='bold',
         bbox=dict(boxstyle="round,pad=0.3", facecolor='lightblue', alpha=0.5))
 
-    plt.text(np.sum(data<0) + np.sum(data>=0) / 2 - 0.5, 1.1, 'Should Not Be Present',
+    plt.text(np.sum(data<0) + np.sum(data>=0) / 2 - 0.5, 1.1, 'Should Be Absent',
         ha='center', va='center', fontsize=14, fontweight='bold',
         bbox=dict(boxstyle="round,pad=0.3", facecolor='lightcoral', alpha=0.5))
 
@@ -144,4 +144,7 @@ def plot_explanation(data, binary_data, labels, total_dist):
 
     plt.legend(handles=legend_elements, loc='center right', prop={'family': 'sans-serif', 'weight': 'bold', 'size': 14})
     plt.tight_layout()
+    plot_dir = os.path.join(PROJECT_ROOT, 'output', 'plots', 'comparison')
+    os.makedirs(plot_dir, exist_ok=True)
+    plt.savefig(os.path.join(plot_dir, 'local_explanation.png'), dpi=400, bbox_inches='tight')
     plt.show()
