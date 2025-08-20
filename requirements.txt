@@ -1,15 +1,16 @@
+Pillow==11.2.1
 analysis==0.1.7
 joblib==1.4.2
+jupyter
 matplotlib==3.10.3
-numpy==2.2.5
+numpy==1.26.4
 pandas==2.2.3
-Pillow==11.2.1
 scikit_learn==1.6.1
 scipy==1.15.3
 setuptools==65.5.0
+tensorflow
 torch==2.6.0
 torchvision==0.21.0
 tqdm==4.67.1
-tensorflow
 
 derm7pt @ git+https://github.com/patbarry29/derm7pt.git@master
