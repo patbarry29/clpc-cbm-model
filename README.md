@@ -1,7 +1,7 @@
 # clpc-cbm-model
 This repo contains the code written to implement our model, including the experiments used in the paper.
 
-As our paper focuses on the second stage, the outputs of stage 1 are provided below to simplify the reproduction. 
+As our paper focuses on the second stage, the outputs of stage 1 are provided below to simplify the reproduction.
 
 We tested our model on 3 different datasets: CUB, Derm7pt, RIVAL10.
 
@@ -26,10 +26,13 @@ We tested our model on 3 different datasets: CUB, Derm7pt, RIVAL10.
 **Install all dependencies.**
 - `pip install -r requirements.txt`
 
+**Build project (from root):**
+- `pip install -e .`
+
 # Experiment Reproduction
 
 ## Model Performance
-To get the performance of the model for Top-1 classification, run [notebook/phase_2.ipynb](notebook/phase_2.ipynb), using index 0, 1, or 2 at the top of the notebook to choose the dataset. 
+To get the performance of the model for Top-1 classification, run [notebook/phase_2.ipynb](notebook/phase_2.ipynb), using index 0, 1, or 2 at the top of the notebook to choose the dataset.
 ```python
 datasets = ['CUB', 'Derm7pt', 'RIVAL10']
 use_dataset = datasets[1]
@@ -43,7 +46,7 @@ Run [notebook/experiments/test_robustness.ipynb](notebook/experiments/test_robus
 
 
 # (OPTIONAL) Stage 1 Reproduction
-To reproduce this, first the datasets must be downloaded from the 3 links above. 
+To reproduce this, first the datasets must be downloaded from the 3 links above.
 
 ## Dataset Preparation
 
@@ -59,7 +62,7 @@ RIVAL10 is a special case, as the images are mixed with the concept descriptions
 - So we must run a command to separate these into different folders.
   - ```bash
     mkdir -p RIVAL10/images/train/images RIVAL10/images/test/images
-  
+
     find RIVAL10/train -type f -iname '*.JPEG' ! -iname '*_merged_mask.JPEG' -exec mv {} RIVAL10/images/train/images/ \;
     find RIVAL10/test -type f -iname '*.JPEG' ! -iname '*_merged_mask.JPEG' -exec mv {} RIVAL10/images/test/images/ \;
     ```
@@ -71,7 +74,7 @@ Now there are 3 folders left in `PROJECT_ROOT/data/RIVAL10`: `meta`, `train`, `t
 - `train` and `test`, with subfolder `ordinary`:
   - consists of `.npy` and `.pkl` files
   - One of each for every image. They describe the concept values present in each image.
- 
+
 ## Running Experiments
 Now that the datasets are all in the correct places, the structure should look like this:
 
@@ -80,4 +83,4 @@ Now that the datasets are all in the correct places, the structure should look l
 With this in place, we can run stage 1. Simply go to `notebook/{dataset}/training.ipynb`, and run the notebook.
 - Note that this is an intensive process, particularly for CUB and RIVAL10.
 - The learned model will be saved locally.
-- Run `notebook/{dataset}/test.ipynb` to get the test accuracy and store the outputs of the CNN locally. 
+- Run `notebook/{dataset}/test.ipynb` to get the test accuracy and store the outputs of the CNN locally.
